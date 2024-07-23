@@ -174,6 +174,13 @@ export class UserManagementResolver {
     private readonly user: UserService
   ) {}
 
+  @Query(() => Int, {
+    description: 'Get users count',
+  })
+  async usersCount(): Promise<number> {
+    return this.db.user.count();
+  }
+
   @Query(() => [UserType], {
     description: 'List registered users',
   })

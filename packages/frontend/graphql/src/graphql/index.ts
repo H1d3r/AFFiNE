@@ -494,6 +494,17 @@ query getUser($email: String!) {
 }`,
 };
 
+export const getUsersCountQuery = {
+  id: 'getUsersCountQuery' as const,
+  operationName: 'getUsersCount',
+  definitionName: 'usersCount',
+  containsFile: false,
+  query: `
+query getUsersCount {
+  usersCount
+}`,
+};
+
 export const getWorkspaceFeaturesQuery = {
   id: 'getWorkspaceFeaturesQuery' as const,
   operationName: 'getWorkspaceFeatures',

@@ -550,6 +550,9 @@ type Query {
   """List registered users"""
   users(filter: ListUserInput!): [UserType!]!
 
+  """Get users count"""
+  usersCount: Int!
+
   """Get workspace by id"""
   workspace(id: String!): WorkspaceType!
 
