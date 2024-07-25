@@ -41,7 +41,7 @@ export const router = _createBrowserRouter(
       children: [
         {
           path: '',
-          lazy: () => import('./modules/home'),
+          lazy: () => import('./modules/accounts'),
         },
         {
           path: '/admin/auth',
@@ -51,11 +51,11 @@ export const router = _createBrowserRouter(
           path: '/admin/users',
           lazy: () => import('./modules/users'),
         },
+        {
+          path: '/admin/setup',
+          lazy: () => import('./modules/setup'),
+        },
       ],
-    },
-    {
-      path: '/setup',
-      lazy: () => import('./modules/setup'),
     },
   ],
   {
