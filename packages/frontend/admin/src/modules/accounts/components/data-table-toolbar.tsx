@@ -8,6 +8,7 @@ import { startTransition, useCallback, useEffect, useState } from 'react';
 
 import { useRightPanel } from '../../layout';
 import { CreateUserPanel } from './ceate-user-panel';
+import { DiscardChanges } from './discard-changes';
 
 interface DataTableToolbarProps<TData> {
   data: TData[];
@@ -35,12 +36,19 @@ export function DataTableToolbar<TData>({
   setDataTable,
 }: DataTableToolbarProps<TData>) {
   const [value, setValue] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const debouncedValue = useDebouncedValue(value, 500);
-  const { setRightPanelContent, openPanel } = useRightPanel();
-  const handleClick = useCallback(() => {
+  const { setRightPanelContent, openPanel, isOpen } = useRightPanel();
+
+  const handleConfirm = useCallback(() => {
     setRightPanelContent(<CreateUserPanel />);
-    openPanel();
-  }, [setRightPanelContent, openPanel]);
+    if (dialogOpen) {
+      setDialogOpen(false);
+    }
+    if (!isOpen) {
+      openPanel();
+    }
+  }, [setRightPanelContent, dialogOpen, isOpen, openPanel]);
 
   const result = useQuery({
     query: getUserByEmailQuery,
@@ -70,6 +78,17 @@ export function DataTableToolbar<TData>({
     []
   );
 
+  const handleCancel = useCallback(() => {
+    setDialogOpen(false);
+  }, []);
+
+  const handleOpenConfirm = useCallback(() => {
+    if (isOpen) {
+      return setDialogOpen(true);
+    }
+    return handleConfirm();
+  }, [handleConfirm, isOpen]);
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -82,10 +101,16 @@ export function DataTableToolbar<TData>({
       </div>
       <Button
         className="px-4 py-2 space-x-[10px] text-sm font-medium"
-        onClick={handleClick}
+        onClick={handleOpenConfirm}
       >
         <PlusIcon size={20} /> <span>Add User</span>
       </Button>
+      <DiscardChanges
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onClose={handleCancel}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 }

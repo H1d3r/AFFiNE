@@ -29,7 +29,9 @@ import { toast } from 'sonner';
 import { useRightPanel } from '../../layout';
 import { userSchema } from '../schema';
 import { DeleteAccountDialog } from './delete-account';
+import { DiscardChanges } from './discard-changes';
 import { EditPanel } from './edit-panel';
+import { ResetPasswordDialog } from './reset-password';
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -39,8 +41,11 @@ export function DataTableRowActions<TData>({
   row,
 }: DataTableRowActionsProps<TData>) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+  const [resetPasswordLink, setResetPasswordLink] = useState('');
   const user = userSchema.parse(row.original);
-  const { setRightPanelContent, openPanel } = useRightPanel();
+  const { setRightPanelContent, openPanel, isOpen } = useRightPanel();
 
   const { trigger: onResetPassword } = useMutation({
     mutation: createChangePasswordUrlMutation,
@@ -51,15 +56,32 @@ export function DataTableRowActions<TData>({
 
   const revalidate = useMutateQueryResource();
 
-  const handleResetPassword = useCallback(() => {
+  const openResetPasswordDialog = useCallback(() => {
+    setResetPasswordLink('');
     onResetPassword({
       userId: user.id,
       callbackUrl: '/auth/changePassword?isClient=false',
-    }).then(res => {
-      navigator.clipboard.writeText(res.createChangePasswordUrl);
-      toast('Reset password link copied to clipboard');
-    });
+    })
+      .then(res => {
+        setResetPasswordLink(res.createChangePasswordUrl);
+        setResetPasswordDialogOpen(true);
+      })
+      .catch(e => {
+        toast.error('Failed to reset password: ' + e.message);
+      });
   }, [onResetPassword, user.id]);
+
+  const handleResetPassword = useCallback(() => {
+    navigator.clipboard
+      .writeText(resetPasswordLink)
+      .then(() => {
+        toast('Reset password link copied to clipboard');
+        setResetPasswordDialogOpen(false);
+      })
+      .catch(e => {
+        toast.error('Failed to copy reset password link: ' + e.message);
+      });
+  }, [resetPasswordLink]);
 
   const handleDelete = useAsyncCallback(async () => {
     await deleteUserById({ id: user.id })
@@ -81,22 +103,43 @@ export function DataTableRowActions<TData>({
     setDeleteDialogOpen(false);
   }, []);
 
-  const handleEdit = useCallback(() => {
+  const handleDiscardChangesCancel = useCallback(() => {
+    setDiscardDialogOpen(false);
+  }, []);
+
+  const handleConfirm = useCallback(() => {
     setRightPanelContent(
       <EditPanel
         user={user}
-        onResetPassword={handleResetPassword}
+        onResetPassword={openResetPasswordDialog}
         onDeleteAccount={openDeleteDialog}
       />
     );
-    openPanel();
+    if (discardDialogOpen) {
+      handleDiscardChangesCancel();
+    }
+
+    if (!isOpen) {
+      openPanel();
+    }
   }, [
-    handleResetPassword,
+    discardDialogOpen,
+    handleDiscardChangesCancel,
+    isOpen,
     openDeleteDialog,
     openPanel,
+    openResetPasswordDialog,
     setRightPanelContent,
     user,
   ]);
+
+  const handleEdit = useCallback(() => {
+    if (isOpen) {
+      setDiscardDialogOpen(true);
+    } else {
+      handleConfirm();
+    }
+  }, [handleConfirm, isOpen]);
 
   return (
     <div className="flex justify-end items-center">
@@ -117,7 +160,7 @@ export function DataTableRowActions<TData>({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="px-2 py-[6px] text-sm font-medium gap-2 cursor-pointer"
-            onSelect={handleResetPassword}
+            onSelect={openResetPasswordDialog}
           >
             <LockIcon size={16} /> Reset Password
           </DropdownMenuItem>
@@ -143,6 +186,18 @@ export function DataTableRowActions<TData>({
         onClose={closeDeleteDialog}
         onOpenChange={setDeleteDialogOpen}
         onDelete={handleDelete}
+      />
+      <ResetPasswordDialog
+        link={resetPasswordLink}
+        open={resetPasswordDialogOpen}
+        onOpenChange={setResetPasswordDialogOpen}
+        onCopy={handleResetPassword}
+      />
+      <DiscardChanges
+        open={discardDialogOpen}
+        onOpenChange={setDiscardDialogOpen}
+        onClose={handleDiscardChangesCancel}
+        onConfirm={handleConfirm}
       />
     </div>
   );

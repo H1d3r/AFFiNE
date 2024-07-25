@@ -10,6 +10,7 @@ import { useQuery } from '@affine/core/hooks/use-query';
 import { serverConfigQuery } from '@affine/graphql';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import { CreateAdmin } from './create-admin';
 
@@ -93,19 +94,73 @@ export const Form = () => {
     });
   }, [api]);
 
-  const onNext = useCallback(() => {
-    if (
-      isCreateAdminStep &&
-      !validateEmailAndPassword(
-        emailValue,
-        passwordValue,
-        passwordLimits,
-        setInvalidEmail,
-        setInvalidPassword
-      )
-    ) {
-      return;
+  const createAdmin = useCallback(async () => {
+    if (invalidEmail || invalidPassword) return;
+
+    try {
+      const createResponse = await fetch('/api/setup/create-admin-user', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: emailValue,
+          password: passwordValue,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json();
+        throw new Error(errorData.message || 'Failed to create admin');
+      }
+
+      const signInResponse = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: emailValue,
+          password: passwordValue,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!signInResponse.ok) {
+        const errorData = await signInResponse.json();
+        throw new Error(errorData.message || 'Failed to login');
+      }
+
+      await signInResponse.json();
+      toast.success('Admin account created successfully.');
+    } catch (err) {
+      toast.error((err as Error).message);
+      console.error(err);
+      throw err;
     }
+  }, [emailValue, invalidEmail, invalidPassword, passwordValue]);
+
+  const onNext = useCallback(async () => {
+    if (isCreateAdminStep) {
+      if (
+        !validateEmailAndPassword(
+          emailValue,
+          passwordValue,
+          passwordLimits,
+          setInvalidEmail,
+          setInvalidPassword
+        )
+      ) {
+        return;
+      } else {
+        try {
+          await createAdmin();
+        } catch (e) {
+          console.error(e);
+          return;
+        }
+      }
+    }
+
     if (current === count) {
       return navigate('/', { replace: true });
     }
@@ -114,6 +169,7 @@ export const Form = () => {
   }, [
     api,
     count,
+    createAdmin,
     current,
     emailValue,
     isCreateAdminStep,

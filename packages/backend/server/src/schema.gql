@@ -417,11 +417,11 @@ type Mutation {
   changeEmail(email: String!, token: String!): UserType!
   changePassword(newPassword: String!, token: String!): UserType!
 
-  """create change password url for self-host users"""
-  createChangePasswordUrl(callbackUrl: String!, userId: String!): String!
-
   """Cleanup sessions"""
   cleanupCopilotSession(options: DeleteSessionInput!): [String!]!
+
+  """create change password url for self-host users"""
+  createChangePasswordUrl(callbackUrl: String!, userId: String!): String!
 
   """Create a subscription checkout link of stripe"""
   createCheckoutSession(input: CreateCheckoutSessionInput!): String!

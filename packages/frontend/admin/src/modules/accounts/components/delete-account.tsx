@@ -32,7 +32,7 @@ export const DeleteAccountDialog = ({
   );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>
           <DialogTitle>Delete Account ?</DialogTitle>
           <DialogDescription>
@@ -46,6 +46,7 @@ export const DeleteAccountDialog = ({
           value={input}
           onChange={handleInput}
           placeholder="Please type email to confirm"
+          className="placeholder:opacity-50"
         />
         <DialogFooter>
           <div className="flex justify-between items-center w-full">

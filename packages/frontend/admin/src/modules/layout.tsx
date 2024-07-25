@@ -12,6 +12,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -26,6 +27,7 @@ interface LayoutProps {
 }
 
 interface RightPanelContextType {
+  isOpen: boolean;
   rightPanelContent: ReactNode;
   setRightPanelContent: (content: ReactNode) => void;
   togglePanel: () => void;
@@ -40,22 +42,22 @@ const navLinks: NavProp[] = [
   {
     title: 'Accounts',
     icon: Users,
-    variant: 'default',
+    to: '/admin/accounts',
   },
   {
     title: 'AI',
     icon: Cpu,
-    variant: 'ghost',
+    to: '/admin/ai',
   },
   {
     title: 'Config',
     icon: ClipboardList,
-    variant: 'ghost',
+    to: '/admin/config',
   },
   {
     title: 'Settings',
     icon: Settings,
-    variant: 'ghost',
+    to: '/admin/settings',
   },
 ];
 
@@ -71,12 +73,21 @@ export const useRightPanel = () => {
 
 export function Layout({ content }: LayoutProps) {
   const [rightPanelContent, setRightPanelContent] = useState<ReactNode>(null);
+  const [open, setOpen] = useState(false);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
 
   const handleExpand = useCallback(() => {
     if (rightPanelRef.current?.getSize() === 0) {
       rightPanelRef.current?.resize(30);
     }
+    setOpen(true);
+  }, [rightPanelRef]);
+
+  const handleCollapse = useCallback(() => {
+    if (rightPanelRef.current?.getSize() !== 0) {
+      rightPanelRef.current?.resize(0);
+    }
+    setOpen(false);
   }, [rightPanelRef]);
 
   const openPanel = useCallback(() => {
@@ -85,17 +96,28 @@ export function Layout({ content }: LayoutProps) {
   }, [handleExpand]);
 
   const closePanel = useCallback(() => {
+    handleCollapse();
     rightPanelRef.current?.collapse();
-  }, [rightPanelRef]);
+  }, [handleCollapse]);
 
   const togglePanel = useCallback(
     () => (rightPanelRef.current?.isCollapsed() ? openPanel() : closePanel()),
     [closePanel, openPanel]
   );
 
+  const activeTab = useMemo(() => {
+    const path = window.location.pathname;
+
+    return (
+      navLinks.find(link => path.endsWith(link.title.toLocaleLowerCase()))
+        ?.title || ''
+    );
+  }, []);
+
   return (
     <RightPanelContext.Provider
       value={{
+        isOpen: open,
         rightPanelContent,
         setRightPanelContent,
         togglePanel,
@@ -115,7 +137,7 @@ export function Layout({ content }: LayoutProps) {
               AFFiNE
             </div>
             <Separator />
-            <Nav links={navLinks} />
+            <Nav links={navLinks} activeTab={activeTab} />
           </div>
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel minSize={50}>{content}</ResizablePanel>
@@ -127,6 +149,7 @@ export function Layout({ content }: LayoutProps) {
               collapsible={true}
               collapsedSize={0}
               onExpand={handleExpand}
+              onCollapse={handleCollapse}
             >
               {rightPanelContent}
             </ResizablePanel>

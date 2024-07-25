@@ -7,22 +7,31 @@ import { UserDropdown } from './user-dropdown';
 
 export interface NavProp {
   title: string;
+  to: string;
   label?: string;
   icon: LucideIcon;
-  variant: 'default' | 'ghost';
 }
 
-export function Nav({ links }: { links: NavProp[] }) {
+export function Nav({
+  links,
+  activeTab,
+}: {
+  links: NavProp[];
+  activeTab: string;
+}) {
   return (
     <div className="group flex flex-col gap-4 py-2 justify-between flex-grow">
       <nav className="grid gap-1 px-2">
         {links.map((link, index) => (
           <Link
             key={index}
-            to="#"
+            to={link.to}
             className={cn(
-              buttonVariants({ variant: link.variant, size: 'sm' }),
-              link.variant === 'default' &&
+              buttonVariants({
+                variant: activeTab === link.title ? 'default' : 'ghost',
+                size: 'sm',
+              }),
+              activeTab === link.title &&
                 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
               'justify-start'
             )}
@@ -33,8 +42,7 @@ export function Nav({ links }: { links: NavProp[] }) {
               <span
                 className={cn(
                   'ml-auto',
-                  link.variant === 'default' &&
-                    'text-background dark:text-white'
+                  activeTab === link.title && 'text-background dark:text-white'
                 )}
               >
                 {link.label}

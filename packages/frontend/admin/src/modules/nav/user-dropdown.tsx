@@ -13,9 +13,13 @@ import {
   DropdownMenuTrigger,
 } from '@affine/admin/components/ui/dropdown-menu';
 import { useQuery } from '@affine/core/hooks/use-query';
-import { FeatureType, getCurrentUserFeaturesQuery } from '@affine/graphql';
+import {
+  FeatureType,
+  getCurrentUserFeaturesQuery,
+  serverConfigQuery,
+} from '@affine/graphql';
 import { CircleUser, MoreVertical } from 'lucide-react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -25,9 +29,32 @@ export function UserDropdown() {
   } = useQuery({
     query: getCurrentUserFeaturesQuery,
   });
+
+  const {
+    data: { serverConfig },
+  } = useQuery({
+    query: serverConfigQuery,
+  });
+
   const navigate = useNavigate();
 
+  const handleLogout = useCallback(() => {
+    fetch('/api/auth/sign-out', {
+      method: 'POST',
+    })
+      .then(() => {
+        navigate('/admin/auth');
+      })
+      .catch(err => {
+        toast.error(`Failed to logout: ${err.message}`);
+      });
+  }, [navigate]);
+
   useEffect(() => {
+    if (serverConfig.initialized === false) {
+      navigate('/admin/setup');
+      return;
+    }
     if (!currentUser) {
       navigate('/admin/auth');
       return;
@@ -37,7 +64,7 @@ export function UserDropdown() {
       navigate('/admin/auth');
       return;
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, serverConfig.initialized]);
 
   return (
     <div className="flex items-center justify-between px-4 py-3 flex-nowrap">
@@ -75,10 +102,7 @@ export function UserDropdown() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{currentUser?.name}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Settings</DropdownMenuItem>
-          <DropdownMenuItem>Support</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>Logout</DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleLogout}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

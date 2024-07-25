@@ -1,10 +1,7 @@
 import { Form } from './form';
 import logo from './logo.svg';
 
-export function Auth() {
-  // const emailRef = useRef<HTMLInputElement>(null);
-  // const passwordRef = useRef<HTMLInputElement>(null);
-
+export function Setup() {
   return (
     <div className="w-full lg:grid lg:grid-cols-2 h-screen">
       <div className="flex items-center justify-center py-12 h-full">
@@ -21,4 +18,4 @@ export function Auth() {
   );
 }
 
-export { Auth as Component };
+export { Setup as Component };
