@@ -476,7 +476,7 @@ export interface Mutation {
   changePassword: UserType;
   /** Cleanup sessions */
   cleanupCopilotSession: Array<Scalars['String']['output']>;
-  /** create change password url for self-host users */
+  /** Create change password url */
   createChangePasswordUrl: Scalars['String']['output'];
   /** Create a subscription checkout link of stripe */
   createCheckoutSession: Scalars['String']['output'];

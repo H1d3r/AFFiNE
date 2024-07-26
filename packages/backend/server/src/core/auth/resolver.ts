@@ -295,7 +295,7 @@ export class AuthResolver {
 
   @Admin()
   @Mutation(() => String, {
-    description: 'create change password url for self-host users',
+    description: 'Create change password url',
   })
   async createChangePasswordUrl(
     @Args('userId') userId: string,

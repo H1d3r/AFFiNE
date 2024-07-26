@@ -286,7 +286,7 @@ export class UserManagementResolver {
     }
     return sessionUser(
       await this.user.updateUser(user.id, {
-        name: input.name ?? input.email.slice(0, input.email.indexOf('@')),
+        name: input.name,
         email: input.email,
       })
     );

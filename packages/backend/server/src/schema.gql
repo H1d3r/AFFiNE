@@ -420,7 +420,7 @@ type Mutation {
   """Cleanup sessions"""
   cleanupCopilotSession(options: DeleteSessionInput!): [String!]!
 
-  """create change password url for self-host users"""
+  """Create change password url"""
   createChangePasswordUrl(callbackUrl: String!, userId: String!): String!
 
   """Create a subscription checkout link of stripe"""

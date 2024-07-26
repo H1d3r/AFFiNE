@@ -114,23 +114,7 @@ export const Form = () => {
         throw new Error(errorData.message || 'Failed to create admin');
       }
 
-      const signInResponse = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: emailValue,
-          password: passwordValue,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!signInResponse.ok) {
-        const errorData = await signInResponse.json();
-        throw new Error(errorData.message || 'Failed to login');
-      }
-
-      await signInResponse.json();
+      await createResponse.json();
       toast.success('Admin account created successfully.');
     } catch (err) {
       toast.error((err as Error).message);
