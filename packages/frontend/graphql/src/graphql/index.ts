@@ -496,6 +496,33 @@ query oauthProviders {
 }`,
 };
 
+export const getPromptsQuery = {
+  id: 'getPromptsQuery' as const,
+  operationName: 'getPrompts',
+  definitionName: 'listCopilotPrompts',
+  containsFile: false,
+  query: `
+query getPrompts {
+  listCopilotPrompts {
+    name
+    model
+    action
+    config {
+      jsonMode
+      frequencyPenalty
+      presencePenalty
+      temperature
+      topP
+    }
+    messages {
+      role
+      content
+      params
+    }
+  }
+}`,
+};
+
 export const getServerRuntimeConfigQuery = {
   id: 'getServerRuntimeConfigQuery' as const,
   operationName: 'getServerRuntimeConfig',

@@ -1,0 +1,41 @@
+import { Separator } from '@affine/admin/components/ui/separator';
+import { cn } from '@affine/admin/utils';
+import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
+
+import { Layout } from '../layout';
+import { Keys } from './keys';
+import { Prompts } from './prompts';
+
+export function Ai() {
+  return <Layout content={<AiPage />} />;
+}
+
+export function AiPage() {
+  return (
+    <div className=" h-screen flex-1 space-y-1 flex-col flex">
+      <div className="flex items-center justify-between px-6 py-3">
+        <div className="text-base font-medium">AI</div>
+      </div>
+      <Separator />
+      <ScrollAreaPrimitive.Root
+        className={cn('relative overflow-hidden w-full')}
+      >
+        <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] [&>div]:!block">
+          <Keys />
+          <Prompts />
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollAreaPrimitive.ScrollAreaScrollbar
+          className={cn(
+            'flex touch-none select-none transition-colors',
+
+            'h-full w-2.5 border-l border-l-transparent p-[1px]'
+          )}
+        >
+          <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+        </ScrollAreaPrimitive.ScrollAreaScrollbar>
+        <ScrollAreaPrimitive.Corner />
+      </ScrollAreaPrimitive.Root>
+    </div>
+  );
+}
+export { Ai as Component };

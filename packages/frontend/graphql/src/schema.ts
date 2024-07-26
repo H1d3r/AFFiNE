@@ -1684,6 +1684,32 @@ export type OauthProvidersQuery = {
   };
 };
 
+export type GetPromptsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetPromptsQuery = {
+  __typename?: 'Query';
+  listCopilotPrompts: Array<{
+    __typename?: 'CopilotPromptType';
+    name: string;
+    model: CopilotModels;
+    action: string | null;
+    config: {
+      __typename?: 'CopilotPromptConfigType';
+      jsonMode: boolean | null;
+      frequencyPenalty: number | null;
+      presencePenalty: number | null;
+      temperature: number | null;
+      topP: number | null;
+    } | null;
+    messages: Array<{
+      __typename?: 'CopilotPromptMessageType';
+      role: CopilotPromptMessageRole;
+      content: string;
+      params: Record<string, string> | null;
+    }>;
+  }>;
+};
+
 export type GetServerRuntimeConfigQueryVariables = Exact<{
   [key: string]: never;
 }>;
@@ -2431,6 +2457,11 @@ export type Queries =
       name: 'oauthProvidersQuery';
       variables: OauthProvidersQueryVariables;
       response: OauthProvidersQuery;
+    }
+  | {
+      name: 'getPromptsQuery';
+      variables: GetPromptsQueryVariables;
+      response: GetPromptsQuery;
     }
   | {
       name: 'getServerRuntimeConfigQuery';
