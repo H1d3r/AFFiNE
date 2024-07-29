@@ -108,7 +108,7 @@ export interface CopilotPromptConfigInput {
   jsonMode: InputMaybe<Scalars['Boolean']['input']>;
   presencePenalty: InputMaybe<Scalars['Float']['input']>;
   temperature: InputMaybe<Scalars['Float']['input']>;
-  topP: InputMaybe<Scalars['SafeInt']['input']>;
+  topP: InputMaybe<Scalars['Float']['input']>;
 }
 
 export interface CopilotPromptConfigType {
@@ -117,7 +117,7 @@ export interface CopilotPromptConfigType {
   jsonMode: Maybe<Scalars['Boolean']['output']>;
   presencePenalty: Maybe<Scalars['Float']['output']>;
   temperature: Maybe<Scalars['Float']['output']>;
-  topP: Maybe<Scalars['SafeInt']['output']>;
+  topP: Maybe<Scalars['Float']['output']>;
 }
 
 export interface CopilotPromptMessageInput {
@@ -2212,6 +2212,35 @@ export type UpdateAccountMutation = {
   };
 };
 
+export type UpdatePromptMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  messages: Array<CopilotPromptMessageInput> | CopilotPromptMessageInput;
+}>;
+
+export type UpdatePromptMutation = {
+  __typename?: 'Mutation';
+  updateCopilotPrompt: {
+    __typename?: 'CopilotPromptType';
+    name: string;
+    model: string;
+    action: string | null;
+    config: {
+      __typename?: 'CopilotPromptConfigType';
+      jsonMode: boolean | null;
+      frequencyPenalty: number | null;
+      presencePenalty: number | null;
+      temperature: number | null;
+      topP: number | null;
+    } | null;
+    messages: Array<{
+      __typename?: 'CopilotPromptMessageType';
+      role: CopilotPromptMessageRole;
+      content: string;
+      params: Record<string, string> | null;
+    }>;
+  };
+};
+
 export type UpdateServerRuntimeConfigsMutationVariables = Exact<{
   updates: Scalars['JSONObject']['input'];
 }>;
@@ -2759,6 +2788,11 @@ export type Mutations =
       name: 'updateAccountMutation';
       variables: UpdateAccountMutationVariables;
       response: UpdateAccountMutation;
+    }
+  | {
+      name: 'updatePromptMutation';
+      variables: UpdatePromptMutationVariables;
+      response: UpdatePromptMutation;
     }
   | {
       name: 'updateServerRuntimeConfigsMutation';

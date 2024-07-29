@@ -1084,6 +1084,33 @@ mutation updateAccount($id: String!, $input: ManageUserInput!) {
 }`,
 };
 
+export const updatePromptMutation = {
+  id: 'updatePromptMutation' as const,
+  operationName: 'updatePrompt',
+  definitionName: 'updateCopilotPrompt',
+  containsFile: false,
+  query: `
+mutation updatePrompt($name: String!, $messages: [CopilotPromptMessageInput!]!) {
+  updateCopilotPrompt(name: $name, messages: $messages) {
+    name
+    model
+    action
+    config {
+      jsonMode
+      frequencyPenalty
+      presencePenalty
+      temperature
+      topP
+    }
+    messages {
+      role
+      content
+      params
+    }
+  }
+}`,
+};
+
 export const updateServerRuntimeConfigsMutation = {
   id: 'updateServerRuntimeConfigsMutation' as const,
   operationName: 'updateServerRuntimeConfigs',

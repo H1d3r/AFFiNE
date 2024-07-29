@@ -3,43 +3,57 @@ import { ScrollArea } from '@affine/admin/components/ui/scroll-area';
 import { Separator } from '@affine/admin/components/ui/separator';
 import { Textarea } from '@affine/admin/components/ui/textarea';
 import { CheckIcon, XIcon } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useRightPanel } from '../layout';
 import type { Prompt } from './prompts';
+import { usePrompt } from './use-prompt';
 
 export function EditPrompt({ item }: { item: Prompt }) {
   const { closePanel } = useRightPanel();
 
   const [messages, setMessages] = useState(item.messages);
+  const { updatePrompt } = usePrompt();
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      console.log(e);
+    (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
+      const newMessages = [...messages];
+      newMessages[index] = {
+        ...newMessages[index],
+        content: e.target.value,
+      };
+      setMessages(newMessages);
     },
-    []
+    [messages]
   );
+  const handleClose = useCallback(() => {
+    setMessages(item.messages);
+    closePanel();
+  }, [closePanel, item.messages]);
 
   const onConfirm = useCallback(() => {
-    closePanel();
-  }, [closePanel]);
+    updatePrompt({ name: item.name, messages });
+    handleClose();
+  }, [handleClose, item.name, messages, updatePrompt]);
 
-  //TODO(Jimmfly): add logic to save
-  const [disableSave, _] = useState(true);
+  const disableSave = useMemo(
+    () => JSON.stringify(messages) === JSON.stringify(item.messages),
+    [item.messages, messages]
+  );
 
   useEffect(() => {
     setMessages(item.messages);
   }, [item.messages]);
 
   return (
-    <div className="flex flex-col h-screen gap-1">
-      <div className="flex justify-between items-center py-[10px] px-6">
+    <div className="flex flex-col h-full gap-1">
+      <div className="flex-grow-0 flex-shrink-0 h-[56px] flex justify-between items-center py-[10px] px-6 ">
         <Button
           type="button"
           size="icon"
           className="w-7 h-7"
           variant="ghost"
-          onClick={closePanel}
+          onClick={handleClose}
         >
           <XIcon size={20} />
         </Button>
@@ -121,7 +135,7 @@ export function EditPrompt({ item }: { item: Prompt }) {
               <Textarea
                 className=" min-h-48"
                 value={message.content}
-                onChange={handleChange}
+                onChange={e => handleChange(e, index)}
               />
             </div>
           ))}

@@ -26,7 +26,7 @@ export function Keys() {
                 placeholder="sk-xxxxxxxxxxxxx-xxxxxxxxxxxxxx"
                 onChange={e => setOpenAIKey(e.target.value)}
               />
-              <Button>Save</Button>
+              <Button disabled>Save</Button>
             </div>
           </div>
           <Separator />
@@ -40,7 +40,7 @@ export function Keys() {
                 placeholder="00000000-0000-0000-00000000:xxxxxxxxxxxxxxxxx"
                 onChange={e => setFalAIKey(e.target.value)}
               />
-              <Button>Save</Button>
+              <Button disabled>Save</Button>
             </div>
           </div>
           <Separator />
@@ -54,7 +54,7 @@ export function Keys() {
                 placeholder="00000000-0000-0000-00000000:xxxxxxxxxxxxxxxxx"
                 onChange={e => setUnsplashKey(e.target.value)}
               />
-              <Button>Save</Button>
+              <Button disabled>Save</Button>
             </div>
           </div>
           <Separator />

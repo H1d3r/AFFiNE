@@ -28,8 +28,6 @@ const TabsMap: { [key: string]: string } = {
   settings: 'Settings',
 };
 
-const defaultTab = 'Accounts';
-
 export function Nav() {
   const { moduleList } = useGetServerRuntimeConfig();
   const { activeTab, setActiveTab, setCurrentModule } = useNav();
@@ -42,7 +40,6 @@ export function Nav() {
         return;
       }
     }
-    setActiveTab(defaultTab);
   }, [setActiveTab]);
 
   return (
