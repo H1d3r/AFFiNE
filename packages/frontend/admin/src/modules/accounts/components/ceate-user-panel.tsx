@@ -3,24 +3,12 @@ import { Input } from '@affine/admin/components/ui/input';
 import { Label } from '@affine/admin/components/ui/label';
 import { Separator } from '@affine/admin/components/ui/separator';
 import { Switch } from '@affine/admin/components/ui/switch';
-import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
-import {
-  useMutateQueryResource,
-  useMutation,
-} from '@affine/core/hooks/use-mutation';
-import {
-  addToAdminMutation,
-  addToEarlyAccessMutation,
-  createUserMutation,
-  EarlyAccessType,
-  FeatureType,
-  listUsersQuery,
-} from '@affine/graphql';
+import { FeatureType } from '@affine/graphql';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 
 import { useRightPanel } from '../../layout';
+import { useUserManagement } from './use-user-management';
 
 export function CreateUserPanel() {
   const { closePanel } = useRightPanel();
@@ -31,60 +19,17 @@ export function CreateUserPanel() {
 
   const disableSave = useMemo(() => !name || !email, [name, email]);
 
-  const { trigger: createUser } = useMutation({
-    mutation: createUserMutation,
-  });
+  const { createUser } = useUserManagement();
 
-  const { trigger: addToEarlyAccess } = useMutation({
-    mutation: addToEarlyAccessMutation,
-  });
-
-  const { trigger: addToAdmin } = useMutation({
-    mutation: addToAdminMutation,
-  });
-
-  const revalidate = useMutateQueryResource();
-
-  const updateFeatures = useCallback(() => {
-    const shoutAddToAdmin = features.includes(FeatureType.Admin);
-    const shoutAddToAIEarlyAccess = features.includes(
-      FeatureType.AIEarlyAccess
-    );
-
-    return Promise.all([
-      shoutAddToAdmin && addToAdmin({ email }),
-      shoutAddToAIEarlyAccess &&
-        addToEarlyAccess({ email, type: EarlyAccessType.AI }),
-    ]);
-  }, [addToAdmin, addToEarlyAccess, email, features]);
-
-  const onConfirm = useAsyncCallback(async () => {
-    await createUser({
-      input: {
-        name,
-        email,
-        password,
-      },
-    })
-      .then(async () => {
-        await updateFeatures();
-        await revalidate(listUsersQuery);
-        toast('User created successfully');
-        closePanel();
-      })
-      .catch(e => {
-        toast(e.message);
-        console.error(e);
-      });
-  }, [
-    closePanel,
-    createUser,
-    email,
-    name,
-    password,
-    revalidate,
-    updateFeatures,
-  ]);
+  const handleConfirm = useCallback(() => {
+    createUser({
+      name,
+      email,
+      password,
+      features,
+      callback: closePanel,
+    });
+  }, [closePanel, createUser, email, features, name, password]);
 
   const onEarlyAccessChange = useCallback(
     (checked: boolean) => {
@@ -126,7 +71,7 @@ export function CreateUserPanel() {
           size="icon"
           className="w-7 h-7"
           variant="ghost"
-          onClick={onConfirm}
+          onClick={handleConfirm}
           disabled={disableSave}
         >
           <CheckIcon size={20} />

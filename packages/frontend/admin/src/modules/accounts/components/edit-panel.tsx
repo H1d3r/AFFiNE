@@ -3,27 +3,13 @@ import { Input } from '@affine/admin/components/ui/input';
 import { Label } from '@affine/admin/components/ui/label';
 import { Separator } from '@affine/admin/components/ui/separator';
 import { Switch } from '@affine/admin/components/ui/switch';
-import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
-import {
-  useMutateQueryResource,
-  useMutation,
-} from '@affine/core/hooks/use-mutation';
-import {
-  addToAdminMutation,
-  addToEarlyAccessMutation,
-  EarlyAccessType,
-  FeatureType,
-  listUsersQuery,
-  removeAdminMutation,
-  removeEarlyAccessMutation,
-  updateAccountMutation,
-} from '@affine/graphql';
+import { FeatureType } from '@affine/graphql';
 import { CheckIcon, ChevronRightIcon, XIcon } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useRightPanel } from '../../layout';
 import type { User } from '../schema';
+import { useUserManagement } from './use-user-management';
 
 interface EditPanelProps {
   user: User;
@@ -40,70 +26,20 @@ export function EditPanel({
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [features, setFeatures] = useState(user.features);
+  const { updateUser } = useUserManagement();
 
-  const disableSave = useMemo(
-    () =>
-      name === user.name && email === user.email && features === user.features,
-    [email, features, name, user.email, user.features, user.name]
-  );
-  const { trigger: updateAccount } = useMutation({
-    mutation: updateAccountMutation,
-  });
+  const disableSave =
+    name === user.name && email === user.email && features === user.features;
 
-  const { trigger: addToEarlyAccess } = useMutation({
-    mutation: addToEarlyAccessMutation,
-  });
-  const { trigger: removeEarlyAccess } = useMutation({
-    mutation: removeEarlyAccessMutation,
-  });
-  const { trigger: addToAdmin } = useMutation({
-    mutation: addToAdminMutation,
-  });
-  const { trigger: removeAdmin } = useMutation({
-    mutation: removeAdminMutation,
-  });
-
-  const revalidate = useMutateQueryResource();
-
-  const updateFeatures = useCallback(() => {
-    const shoutAddToAdmin = features.includes(FeatureType.Admin);
-    const shoutAddToAIEarlyAccess = features.includes(
-      FeatureType.AIEarlyAccess
-    );
-
-    return Promise.all([
-      shoutAddToAdmin ? addToAdmin({ email }) : removeAdmin({ email }),
-      shoutAddToAIEarlyAccess
-        ? addToEarlyAccess({ email, type: EarlyAccessType.AI })
-        : removeEarlyAccess({ email, type: EarlyAccessType.AI }),
-    ]);
-  }, [
-    addToAdmin,
-    addToEarlyAccess,
-    email,
-    features,
-    removeAdmin,
-    removeEarlyAccess,
-  ]);
-
-  const onConfirm = useAsyncCallback(async () => {
-    updateAccount({
-      id: user.id,
-      input: {
-        name,
-        email,
-      },
-    })
-      .then(async () => {
-        await updateFeatures();
-        await revalidate(listUsersQuery);
-        toast('Account updated successfully');
-        closePanel();
-      })
-      .catch(e => {
-        toast.error('Failed to update account: ' + e.message);
-      });
-  }, [closePanel, email, name, revalidate, updateAccount, updateFeatures]);
+  const onConfirm = useCallback(() => {
+    updateUser({
+      userId: user.id,
+      name,
+      email,
+      features,
+      callback: closePanel,
+    });
+  }, [closePanel, email, features, name, updateUser, user.id]);
 
   const onEarlyAccessChange = useCallback(
     (checked: boolean) => {

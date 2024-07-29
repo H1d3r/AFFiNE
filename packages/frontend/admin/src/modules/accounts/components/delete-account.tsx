@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@affine/admin/components/ui/dialog';
 import { Input } from '@affine/admin/components/ui/input';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export const DeleteAccountDialog = ({
   email,
@@ -30,6 +30,13 @@ export const DeleteAccountDialog = ({
     },
     [setInput]
   );
+
+  useEffect(() => {
+    if (!open) {
+      setInput('');
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[460px]">

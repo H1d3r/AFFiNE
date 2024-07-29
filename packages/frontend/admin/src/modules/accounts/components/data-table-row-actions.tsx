@@ -6,16 +6,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@affine/admin/components/ui/dropdown-menu';
-import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
-import {
-  useMutateQueryResource,
-  useMutation,
-} from '@affine/core/hooks/use-mutation';
-import {
-  createChangePasswordUrlMutation,
-  deleteUserMutation,
-  listUsersQuery,
-} from '@affine/graphql';
 import type { Row } from '@tanstack/react-table';
 import {
   LockIcon,
@@ -32,6 +22,7 @@ import { DeleteAccountDialog } from './delete-account';
 import { DiscardChanges } from './discard-changes';
 import { EditPanel } from './edit-panel';
 import { ResetPasswordDialog } from './reset-password';
+import { useUserManagement } from './use-user-management';
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -43,35 +34,18 @@ export function DataTableRowActions<TData>({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
-  const [resetPasswordLink, setResetPasswordLink] = useState('');
   const user = userSchema.parse(row.original);
-  const { setRightPanelContent, openPanel, isOpen } = useRightPanel();
+  const { setRightPanelContent, openPanel, isOpen, closePanel } =
+    useRightPanel();
 
-  const { trigger: onResetPassword } = useMutation({
-    mutation: createChangePasswordUrlMutation,
-  });
-  const { trigger: deleteUserById } = useMutation({
-    mutation: deleteUserMutation,
-  });
-
-  const revalidate = useMutateQueryResource();
+  const { deleteUser, resetPasswordLink, onResetPassword } =
+    useUserManagement();
 
   const openResetPasswordDialog = useCallback(() => {
-    setResetPasswordLink('');
-    onResetPassword({
-      userId: user.id,
-      callbackUrl: '/auth/changePassword?isClient=false',
-    })
-      .then(res => {
-        setResetPasswordLink(res.createChangePasswordUrl);
-        setResetPasswordDialogOpen(true);
-      })
-      .catch(e => {
-        toast.error('Failed to reset password: ' + e.message);
-      });
+    onResetPassword(user.id, () => setResetPasswordDialogOpen(true));
   }, [onResetPassword, user.id]);
 
-  const handleResetPassword = useCallback(() => {
+  const handleCopy = useCallback(() => {
     navigator.clipboard
       .writeText(resetPasswordLink)
       .then(() => {
@@ -83,17 +57,16 @@ export function DataTableRowActions<TData>({
       });
   }, [resetPasswordLink]);
 
-  const handleDelete = useAsyncCallback(async () => {
-    await deleteUserById({ id: user.id })
-      .then(async () => {
-        toast('User deleted successfully');
-        await revalidate(listUsersQuery);
-        setDeleteDialogOpen(false);
-      })
-      .catch(e => {
-        toast.error('Failed to delete user: ' + e.message);
-      });
-  }, [deleteUserById, revalidate, user.id]);
+  const onDeleting = useCallback(() => {
+    if (isOpen) {
+      closePanel();
+    }
+    setDeleteDialogOpen(false);
+  }, [closePanel, isOpen]);
+
+  const handleDelete = useCallback(() => {
+    deleteUser(user.id, onDeleting);
+  }, [deleteUser, onDeleting, user.id]);
 
   const openDeleteDialog = useCallback(() => {
     setDeleteDialogOpen(true);
@@ -173,7 +146,7 @@ export function DataTableRowActions<TData>({
 
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="px-2 py-[6px] text-sm font-medium gap-2 text-red-700 cursor-pointer focus:text-red-700"
+            className="px-2 py-[6px] text-sm font-medium gap-2 text-red-500 cursor-pointer focus:text-red-500"
             onSelect={openDeleteDialog}
           >
             <TrashIcon size={16} /> Delete
@@ -191,7 +164,7 @@ export function DataTableRowActions<TData>({
         link={resetPasswordLink}
         open={resetPasswordDialogOpen}
         onOpenChange={setResetPasswordDialogOpen}
-        onCopy={handleResetPassword}
+        onCopy={handleCopy}
       />
       <DiscardChanges
         open={discardDialogOpen}
