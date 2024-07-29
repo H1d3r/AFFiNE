@@ -104,20 +104,20 @@ export enum CopilotModels {
 }
 
 export interface CopilotPromptConfigInput {
-  frequencyPenalty: InputMaybe<Scalars['Int']['input']>;
+  frequencyPenalty: InputMaybe<Scalars['Float']['input']>;
   jsonMode: InputMaybe<Scalars['Boolean']['input']>;
-  presencePenalty: InputMaybe<Scalars['Int']['input']>;
-  temperature: InputMaybe<Scalars['Int']['input']>;
-  topP: InputMaybe<Scalars['Int']['input']>;
+  presencePenalty: InputMaybe<Scalars['Float']['input']>;
+  temperature: InputMaybe<Scalars['Float']['input']>;
+  topP: InputMaybe<Scalars['SafeInt']['input']>;
 }
 
 export interface CopilotPromptConfigType {
   __typename?: 'CopilotPromptConfigType';
-  frequencyPenalty: Maybe<Scalars['Int']['output']>;
+  frequencyPenalty: Maybe<Scalars['Float']['output']>;
   jsonMode: Maybe<Scalars['Boolean']['output']>;
-  presencePenalty: Maybe<Scalars['Int']['output']>;
-  temperature: Maybe<Scalars['Int']['output']>;
-  topP: Maybe<Scalars['Int']['output']>;
+  presencePenalty: Maybe<Scalars['Float']['output']>;
+  temperature: Maybe<Scalars['Float']['output']>;
+  topP: Maybe<Scalars['SafeInt']['output']>;
 }
 
 export interface CopilotPromptMessageInput {
@@ -149,7 +149,7 @@ export interface CopilotPromptType {
   action: Maybe<Scalars['String']['output']>;
   config: Maybe<CopilotPromptConfigType>;
   messages: Array<CopilotPromptMessageType>;
-  model: CopilotModels;
+  model: Scalars['String']['output'];
   name: Scalars['String']['output'];
 }
 
@@ -1691,7 +1691,7 @@ export type GetPromptsQuery = {
   listCopilotPrompts: Array<{
     __typename?: 'CopilotPromptType';
     name: string;
-    model: CopilotModels;
+    model: string;
     action: string | null;
     config: {
       __typename?: 'CopilotPromptConfigType';
