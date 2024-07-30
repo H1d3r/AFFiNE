@@ -90,7 +90,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: 'property',
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-2 text-xs">
+        <div className="flex flex-col gap-2 text-xs max-md:hidden">
           <div className="flex justify-end opacity-25">{row.original.id}</div>
           <div className="flex gap-3 items-center justify-end">
             <StatusItem

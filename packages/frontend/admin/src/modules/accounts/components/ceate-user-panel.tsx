@@ -5,7 +5,7 @@ import { Separator } from '@affine/admin/components/ui/separator';
 import { Switch } from '@affine/admin/components/ui/switch';
 import { FeatureType } from '@affine/graphql';
 import { CheckIcon, XIcon } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useRightPanel } from '../../layout';
 import { useUserManagement } from './use-user-management';
@@ -17,7 +17,7 @@ export function CreateUserPanel() {
   const [email, setEmail] = useState('');
   const [features, setFeatures] = useState<FeatureType[]>([]);
 
-  const disableSave = useMemo(() => !name || !email, [name, email]);
+  const disableSave = !name || !email;
 
   const { createUser } = useUserManagement();
 

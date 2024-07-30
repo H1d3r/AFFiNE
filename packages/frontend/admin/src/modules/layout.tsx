@@ -6,18 +6,34 @@ import {
 import { Separator } from '@affine/admin/components/ui/separator';
 import { TooltipProvider } from '@affine/admin/components/ui/tooltip';
 import { cn } from '@affine/admin/utils';
-import { ClipboardList, Cpu, Settings, Users } from 'lucide-react';
+import {
+  AlignJustifyIcon,
+  ClipboardList,
+  Cpu,
+  Settings,
+  Users,
+} from 'lucide-react';
+import type { ReactNode, RefObject } from 'react';
 import {
   createContext,
-  type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import type { ImperativePanelHandle } from 'react-resizable-panels';
 
+import { Button } from '../components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../components/ui/sheet';
 import { Logo } from './accounts/components/logo';
 import type { NavProp } from './nav/nav';
 import { Nav } from './nav/nav';
@@ -70,6 +86,24 @@ export const useRightPanel = () => {
 
   return context;
 };
+
+export function useMediaQuery(query: string) {
+  const [value, setValue] = useState(false);
+
+  useEffect(() => {
+    function onChange(event: MediaQueryListEvent) {
+      setValue(event.matches);
+    }
+
+    const result = matchMedia(query);
+    result.addEventListener('change', onChange);
+    setValue(result.matches);
+
+    return () => result.removeEventListener('change', onChange);
+  }, [query]);
+
+  return value;
+}
 
 export function Layout({ content }: LayoutProps) {
   const [rightPanelContent, setRightPanelContent] = useState<ReactNode>(null);
@@ -127,7 +161,45 @@ export function Layout({ content }: LayoutProps) {
     >
       <TooltipProvider delayDuration={0}>
         <div className="flex">
-          <div className="flex flex-col min-w-52 max-w-sm border-r">
+          <LeftPanel activeTab={activeTab} />
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel id="0" order={0} minSize={50}>
+              {content}
+            </ResizablePanel>
+            <RightPanel
+              rightPanelRef={rightPanelRef}
+              onExpand={handleExpand}
+              onCollapse={handleCollapse}
+            />
+          </ResizablePanelGroup>
+        </div>
+      </TooltipProvider>
+    </RightPanelContext.Provider>
+  );
+}
+
+export const LeftPanel = ({ activeTab }: { activeTab: string }) => {
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
+
+  if (isSmallScreen) {
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            className="fixed  top-[14px] left-6 p-0 h-5 w-5"
+          >
+            <AlignJustifyIcon />
+          </Button>
+        </SheetTrigger>
+        <SheetHeader className="hidden">
+          <SheetTitle>AFFiNE</SheetTitle>
+          <SheetDescription>
+            Admin panel for managing accounts, AI, config, and settings
+          </SheetDescription>
+        </SheetHeader>
+        <SheetContent side="left" className="p-0" withoutCloseButton>
+          <div className="flex flex-col w-full h-full">
             <div
               className={cn(
                 'flex h-[52px] items-center gap-2 px-4 text-base font-medium'
@@ -139,23 +211,80 @@ export function Layout({ content }: LayoutProps) {
             <Separator />
             <Nav links={navLinks} activeTab={activeTab} />
           </div>
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel minSize={50}>{content}</ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel
-              ref={rightPanelRef}
-              defaultSize={0}
-              maxSize={30}
-              collapsible={true}
-              collapsedSize={0}
-              onExpand={handleExpand}
-              onCollapse={handleCollapse}
-            >
-              {rightPanelContent}
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </TooltipProvider>
-    </RightPanelContext.Provider>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-w-52 max-w-sm border-r">
+      <div
+        className={cn(
+          'flex h-[52px] items-center gap-2 px-4 text-base font-medium'
+        )}
+      >
+        <Logo />
+        AFFiNE
+      </div>
+      <Separator />
+      <Nav links={navLinks} activeTab={activeTab} />
+    </div>
   );
-}
+};
+export const RightPanel = ({
+  rightPanelRef,
+  onExpand,
+  onCollapse,
+}: {
+  rightPanelRef: RefObject<ImperativePanelHandle>;
+  onExpand: () => void;
+  onCollapse: () => void;
+}) => {
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
+  const { rightPanelContent, isOpen } = useRightPanel();
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        onExpand();
+      } else {
+        onCollapse();
+      }
+    },
+    [onExpand, onCollapse]
+  );
+
+  if (isSmallScreen) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onOpenChange}>
+        <SheetHeader className="hidden">
+          <SheetTitle>Right Panel</SheetTitle>
+          <SheetDescription>
+            For displaying additional information
+          </SheetDescription>
+        </SheetHeader>
+        <SheetContent side="right" className="p-0" withoutCloseButton>
+          {rightPanelContent}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <>
+      <ResizableHandle />
+      <ResizablePanel
+        id="1"
+        order={1}
+        ref={rightPanelRef}
+        defaultSize={0}
+        maxSize={30}
+        collapsible={true}
+        collapsedSize={0}
+        onExpand={onExpand}
+        onCollapse={onCollapse}
+      >
+        {rightPanelContent}
+      </ResizablePanel>
+    </>
+  );
+};

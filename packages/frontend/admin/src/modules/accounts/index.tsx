@@ -30,7 +30,7 @@ export function AccountPage() {
 
   return (
     <div className=" h-screen flex-1 space-y-1 flex-col flex">
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="flex items-center justify-between px-6 py-3  max-md:ml-9">
         <div className="text-base font-medium">Accounts</div>
       </div>
       <Separator />
