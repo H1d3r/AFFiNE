@@ -1,14 +1,31 @@
 import { Button } from '@affine/admin/components/ui/button';
 import { Input } from '@affine/admin/components/ui/input';
 import { Label } from '@affine/admin/components/ui/label';
-import { FeatureType, getUserFeaturesQuery } from '@affine/graphql';
-import { useCallback, useRef } from 'react';
+import { useQuery } from '@affine/core/hooks/use-query';
+import {
+  FeatureType,
+  getCurrentUserFeaturesQuery,
+  getUserFeaturesQuery,
+  serverConfigQuery,
+} from '@affine/graphql';
+import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import logo from './logo.svg';
 
 export function Auth() {
+  const {
+    data: { currentUser },
+  } = useQuery({
+    query: getCurrentUserFeaturesQuery,
+  });
+
+  const {
+    data: { serverConfig },
+  } = useQuery({
+    query: serverConfigQuery,
+  });
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -24,6 +41,13 @@ export function Auth() {
         'Content-Type': 'application/json',
       },
     })
+      .then(async response => {
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'Failed to login');
+        }
+        return response.json();
+      })
       .then(() =>
         fetch('/graphql', {
           method: 'POST',
@@ -55,8 +79,21 @@ export function Auth() {
         toast.error(`Failed to login: ${err.message}`);
       });
   }, [navigate]);
+
+  useEffect(() => {
+    if (serverConfig.initialized === false) {
+      navigate('/admin/setup');
+      return;
+    } else if (!currentUser) {
+      return;
+    } else if (!currentUser?.features.includes?.(FeatureType.Admin)) {
+      toast.error('You are not an admin, please login the admin account.');
+      return;
+    }
+  }, [currentUser, navigate, serverConfig.initialized]);
+
   return (
-    <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+    <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px] h-screen">
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
