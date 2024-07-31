@@ -3,7 +3,6 @@ import { cn } from '@affine/admin/utils';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 
 import { Layout } from '../layout';
-import { Keys } from './keys';
 import { Prompts } from './prompts';
 
 export function Ai() {
@@ -21,7 +20,6 @@ export function AiPage() {
         className={cn('relative overflow-hidden w-full')}
       >
         <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] [&>div]:!block">
-          <Keys />
           <Prompts />
         </ScrollAreaPrimitive.Viewport>
         <ScrollAreaPrimitive.ScrollAreaScrollbar
