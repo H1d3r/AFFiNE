@@ -1,7 +1,11 @@
 import { defineSchema } from '@toeverything/infra';
 
 export const docIndexSchema = defineSchema({
+  docId: 'String',
   title: 'FullText',
+  // summary of the doc, used for preview
+  summary: { type: 'String', index: false },
+  journal: 'String',
 });
 
 export type DocIndexSchema = typeof docIndexSchema;
@@ -15,9 +19,17 @@ export const blockIndexSchema = defineSchema({
   // reference doc id
   // ['xxx','yyy']
   refDocId: 'String',
-  // reference info
+  // reference info, used for backlink to specific block
   // [{"docId":"xxx","mode":"page","blockIds":["gt5Yfq1maYvgNgpi13rIq"]},{"docId":"yyy","mode":"edgeless","blockIds":["k5prpOlDF-9CzfatmO0W7"]}]
-  ref: 'String',
+  ref: { type: 'String', index: false },
+  // parent block flavour
+  parentFlavour: 'String',
+  // parent block id
+  parentBlockId: 'String',
+  // additional info
+  // { "databaseName": "xxx", "displayMode": "page/edgeless", "noteBlockId": "xxx" }
+  additional: { type: 'String', index: false },
+  markdownPreview: { type: 'String', index: false },
 });
 
 export type BlockIndexSchema = typeof blockIndexSchema;

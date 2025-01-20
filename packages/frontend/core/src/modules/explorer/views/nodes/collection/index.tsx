@@ -5,23 +5,21 @@ import {
   MenuItem,
   toast,
 } from '@affine/component';
-import {
-  filterPage,
-  useEditCollection,
-} from '@affine/core/components/page-list';
-import { track } from '@affine/core/mixpanel';
+import { filterPage } from '@affine/core/components/page-list';
 import { CollectionService } from '@affine/core/modules/collection';
-import { CompatibleFavoriteItemsAdapter } from '@affine/core/modules/properties';
+import { WorkspaceDialogService } from '@affine/core/modules/dialogs';
+import { DocsService } from '@affine/core/modules/doc';
+import { CompatibleFavoriteItemsAdapter } from '@affine/core/modules/favorite';
+import { GlobalContextService } from '@affine/core/modules/global-context';
 import { ShareDocsListService } from '@affine/core/modules/share-doc';
 import type { AffineDNDData } from '@affine/core/types/dnd';
 import type { Collection } from '@affine/env/filter';
 import { PublicPageMode } from '@affine/graphql';
 import { useI18n } from '@affine/i18n';
+import { track } from '@affine/track';
+import type { DocMeta } from '@blocksuite/affine/store';
 import { FilterMinusIcon } from '@blocksuite/icons/rc';
-import type { DocMeta } from '@blocksuite/store';
 import {
-  DocsService,
-  GlobalContextService,
   LiveData,
   useLiveData,
   useService,
@@ -59,10 +57,10 @@ export const ExplorerCollectionNode = ({
   collectionId: string;
 } & GenericExplorerNode) => {
   const t = useI18n();
-  const { globalContextService } = useServices({
+  const { globalContextService, workspaceDialogService } = useServices({
     GlobalContextService,
+    WorkspaceDialogService,
   });
-  const { open: openEditCollectionModal } = useEditCollection();
   const active =
     useLiveData(globalContextService.globalContext.collectionId.$) ===
     collectionId;
@@ -127,6 +125,9 @@ export const ExplorerCollectionNode = ({
             target: 'doc',
             control: 'drag',
           });
+          track.$.navigationPanel.collections.drop({
+            type: data.source.data.entity.type,
+          });
         }
       } else {
         onDrop?.(data);
@@ -170,17 +171,10 @@ export const ExplorerCollectionNode = ({
     if (!collection) {
       return;
     }
-    openEditCollectionModal(collection)
-      .then(collection => {
-        return collectionService.updateCollection(
-          collection.id,
-          () => collection
-        );
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  }, [collection, collectionService, openEditCollectionModal]);
+    workspaceDialogService.open('collection-editor', {
+      collectionId: collection.id,
+    });
+  }, [collection, workspaceDialogService]);
 
   const collectionOperations = useExplorerCollectionNodeOperations(
     collectionId,

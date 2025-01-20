@@ -1,8 +1,9 @@
 import { TagService } from '@affine/core/modules/tag';
-import { isNewTabTrigger } from '@affine/core/utils';
+import { WorkspaceService } from '@affine/core/modules/workspace';
+import { inferOpenMode } from '@affine/core/utils';
 import { useI18n } from '@affine/i18n';
 import { AllDocsIcon } from '@blocksuite/icons/rc';
-import { useLiveData, useService, WorkspaceService } from '@toeverything/infra';
+import { useLiveData, useService } from '@toeverything/infra';
 import { type MouseEvent, useCallback } from 'react';
 
 import { usePageHelper } from '../../blocksuite/block-suite-page-list/utils';
@@ -31,15 +32,13 @@ export const EmptyDocs = ({
   const pageHelper = usePageHelper(currentWorkspace.docCollection);
   const tag = useLiveData(tagService.tagList.tagByTagId$(tagId));
 
-  const showActionButton = type !== 'trash'; // && !environment.isMobileEdition;
+  const showActionButton = type !== 'trash'; // && !BUILD_CONFIG.isMobileEdition;
 
   const onCreate = useCallback(
     (e: MouseEvent) => {
-      const doc = pageHelper.createPage(
-        undefined,
-        isNewTabTrigger(e) ? 'new-tab' : true
-      );
-      doc.load();
+      const doc = pageHelper.createPage(undefined, {
+        at: inferOpenMode(e),
+      });
 
       if (tag) tag.tag(doc.id);
     },

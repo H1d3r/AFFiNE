@@ -1,16 +1,18 @@
-import { Type } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 
-import { AuthGuard } from './core/auth';
 import {
+  AFFiNELogger,
   CacheInterceptor,
   CloudThrottlerGuard,
   GlobalExceptionFilter,
-} from './fundamentals';
-import { SocketIoAdapter, SocketIoAdapterImpl } from './fundamentals/websocket';
+} from './base';
+import { SocketIoAdapter } from './base/websocket';
+import { AuthGuard } from './core/auth';
+import { ENABLED_FEATURES } from './core/config/server-feature';
+import { responseRequestIdHeader } from './middleware/request-id';
 import { serverTimingAndCache } from './middleware/timing';
 
 export async function createApp() {
@@ -20,10 +22,17 @@ export async function createApp() {
     cors: true,
     rawBody: true,
     bodyParser: true,
-    logger: AFFiNE.affine.stable ? ['log'] : ['verbose'],
+    bufferLogs: true,
   });
 
+  app.useLogger(app.get(AFFiNELogger));
+
+  if (AFFiNE.server.path) {
+    app.setGlobalPrefix(AFFiNE.server.path);
+  }
+
   app.use(serverTimingAndCache);
+  app.use(responseRequestIdHeader);
 
   app.use(
     graphqlUploadExpress({
@@ -39,13 +48,6 @@ export async function createApp() {
   app.use(cookieParser());
 
   if (AFFiNE.flavor.sync) {
-    const SocketIoAdapter = app.get<Type<SocketIoAdapter>>(
-      SocketIoAdapterImpl,
-      {
-        strict: false,
-      }
-    );
-
     const adapter = new SocketIoAdapter(app);
     app.useWebSocketAdapter(adapter);
   }
@@ -56,6 +58,7 @@ export async function createApp() {
       .init(AFFiNE.metrics.telemetry.token)
       .track('selfhost-server-started', {
         version: AFFiNE.version,
+        features: Array.from(ENABLED_FEATURES),
       });
   }
 

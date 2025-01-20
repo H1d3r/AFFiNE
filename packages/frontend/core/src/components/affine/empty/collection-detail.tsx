@@ -1,11 +1,10 @@
-import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
-import { CollectionService } from '@affine/core/modules/collection';
+import { WorkspaceDialogService } from '@affine/core/modules/dialogs';
 import type { Collection } from '@affine/env/filter';
 import { useI18n } from '@affine/i18n';
 import { AllDocsIcon, FilterIcon } from '@blocksuite/icons/rc';
 import { useService } from '@toeverything/infra';
+import { useCallback } from 'react';
 
-import { useEditCollection } from '../../page-list';
 import { ActionButton } from './action-button';
 import collectionDetailDark from './assets/collection-detail.dark.png';
 import collectionDetailLight from './assets/collection-detail.light.png';
@@ -30,7 +29,9 @@ export const EmptyCollectionDetail = ({
       title={t['com.affine.empty.collection-detail.title']()}
       description={t['com.affine.empty.collection-detail.description']()}
       action={
-        environment.isMobileEdition ? null : <Actions collection={collection} />
+        BUILD_CONFIG.isMobileEdition ? null : (
+          <Actions collection={collection} />
+        )
       }
       {...props}
     />
@@ -39,18 +40,21 @@ export const EmptyCollectionDetail = ({
 
 const Actions = ({ collection }: { collection: Collection }) => {
   const t = useI18n();
-  const collectionService = useService(CollectionService);
-  const { open } = useEditCollection();
+  const workspaceDialogService = useService(WorkspaceDialogService);
 
-  const openAddDocs = useAsyncCallback(async () => {
-    const ret = await open({ ...collection }, 'page');
-    collectionService.updateCollection(ret.id, () => ret);
-  }, [open, collection, collectionService]);
+  const openAddDocs = useCallback(() => {
+    workspaceDialogService.open('collection-editor', {
+      collectionId: collection.id,
+      mode: 'page',
+    });
+  }, [collection, workspaceDialogService]);
 
-  const openAddRules = useAsyncCallback(async () => {
-    const ret = await open({ ...collection }, 'rule');
-    collectionService.updateCollection(ret.id, () => ret);
-  }, [collection, open, collectionService]);
+  const openAddRules = useCallback(() => {
+    workspaceDialogService.open('collection-editor', {
+      collectionId: collection.id,
+      mode: 'rule',
+    });
+  }, [collection, workspaceDialogService]);
 
   return (
     <div className={actionGroup}>
