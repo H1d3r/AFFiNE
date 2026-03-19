@@ -449,7 +449,7 @@ __metadata:
     dayjs: "npm:^1.11.13"
     eventemitter2: "npm:^6.4.9"
     fake-indexeddb: "npm:^6.0.0"
-    file-type: "npm:^21.0.0"
+    file-type: "npm:^21.3.3"
     filesize: "npm:^10.1.6"
     foxact: "npm:^0.2.49"
     fuse.js: "npm:^7.0.0"
@@ -1708,7 +1708,7 @@ __metadata:
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.23"
-    file-type: "npm:^21.0.0"
+    file-type: "npm:^21.3.3"
     lit: "npm:^3.2.0"
     rxjs: "npm:^7.8.2"
     zod: "npm:^3.25.76"
@@ -2021,7 +2021,7 @@ __metadata:
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.23"
-    file-type: "npm:^21.0.0"
+    file-type: "npm:^21.3.3"
     lit: "npm:^3.2.0"
     rxjs: "npm:^7.8.2"
     zod: "npm:^3.25.76"
@@ -3700,7 +3700,7 @@ __metadata:
     "@types/lodash.clonedeep": "npm:^4.5.9"
     "@types/lodash.ismatch": "npm:^4.4.9"
     "@types/lodash.merge": "npm:^4.6.9"
-    file-type: "npm:^21.0.0"
+    file-type: "npm:^21.3.3"
     lib0: "npm:^0.2.114"
     lodash.clonedeep: "npm:^4.5.0"
     lodash.ismatch: "npm:^4.4.0"
@@ -23597,15 +23597,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-type@npm:^21.0.0":
-  version: 21.3.2
-  resolution: "file-type@npm:21.3.2"
+"file-type@npm:^21.3.3":
+  version: 21.3.3
+  resolution: "file-type@npm:21.3.3"
   dependencies:
     "@tokenizer/inflate": "npm:^0.4.1"
     strtok3: "npm:^10.3.4"
     token-types: "npm:^6.1.1"
     uint8array-extras: "npm:^1.4.0"
-  checksum: 10/3912271811e0c745d43ff1f6c97e66d4b0d890c68d1041de4ef0c8068ede46f725ef3ed0f92c97d0cd2a261f84c3b51881d60ab797e47fa9a15e7ed227f04c85
+  checksum: 10/7a900a89b7e9f65cfff4d489bc4ad9311d749dd3bae3da753b681dbd1d4bf5fff204c0fa78e620076ccbbc1225f0e25330cd5653342bc78bf6b272015153ea23
   languageName: node
   linkType: hard
 
@@ -33536,12 +33536,12 @@ __metadata:
   linkType: hard
 
 "socket.io-parser@npm:~4.2.4":
-  version: 4.2.4
-  resolution: "socket.io-parser@npm:4.2.4"
+  version: 4.2.6
+  resolution: "socket.io-parser@npm:4.2.6"
   dependencies:
     "@socket.io/component-emitter": "npm:~3.1.0"
-    debug: "npm:~4.3.1"
-  checksum: 10/4be500a9ff7e79c50ec25af11048a3ed34b4c003a9500d656786a1e5bceae68421a8394cf3eb0aa9041f85f36c1a9a737617f4aee91a42ab4ce16ffb2aa0c89c
+    debug: "npm:~4.4.1"
+  checksum: 10/cf8f3e9feee42b2405065bccef732894a0b07b7cb734c4954eb8876d7a0038e7df6e6d06fab3a25f816f5d996917391833d5f06136e8c8c6fbecf5da962c1c9e
   languageName: node
   linkType: hard
 
